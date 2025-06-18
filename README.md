@@ -1,0 +1,2 @@
+# ixd-vh-affective-system
+A version of Kristiyan Balev's affective framework, integrated within the platform architecture for the Virtual Humans project at Interaction Design Lectorate (IxD) at Fontys UAS.
