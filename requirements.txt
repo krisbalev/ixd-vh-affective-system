@@ -7,3 +7,5 @@ openai
 python-dotenv
 websockets
 confluent-kafka
+requests
+fastavro

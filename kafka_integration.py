@@ -7,15 +7,29 @@ import simulation
 from processing import classifier
 from utils import calculate_emotion_intensity
 from optimizer import phi
+from api_client import fetch_topic_schema
+from fastavro.validation import validate
+from fastavro import parse_schema
 
 # Topics and configs
-INPUT_TOPIC  = 'input_topic'
-OUTPUT_TOPIC = 'output_topic'
+INPUT_TOPIC  = 'mood_input_topic'
+OUTPUT_TOPIC = 'mood_output_topic'
+
+brokers = "192.168.120.35:19003,192.168.120.35:19004,192.168.120.35:19005"
+
+try:
+    raw_in  = fetch_topic_schema(INPUT_TOPIC)
+    raw_out = fetch_topic_schema(OUTPUT_TOPIC)
+    avro_schema   = parse_schema(raw_in)
+    avro_schema_out = parse_schema(raw_out)
+except Exception as e:
+    print(f"❌ Failed to load Avro schemas: {e}")
+    raise
 
 # 1) Initialize Consumer
 consumer = Consumer({
-    'bootstrap.servers': 'localhost:9092',
-    'group.id': 'forwarder-group',
+    'bootstrap.servers': brokers ,
+    'group.id': 'mood-group',
     'auto.offset.reset': 'latest',
     'enable.auto.commit': False
 })
@@ -23,7 +37,7 @@ consumer.subscribe([INPUT_TOPIC])
 
 # 2) Initialize Producer
 producer = Producer({
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': brokers ,
     'linger.ms': 5,
     'batch.num.messages': 1000
 })
@@ -50,6 +64,13 @@ def forward_messages():
 
             # 1) Parse incoming OCEAN + text
             payload     = json.loads(msg.value().decode('utf-8'))
+
+            # Validate the schema
+            if not validate(payload, avro_schema):
+                print(f"⚠️  Invalid payload for schema {avro_schema['name']!r}: {payload!r}")
+                consumer.commit(msg)
+                continue
+
             user_text   = payload.get('user_message', '')
             ocean_vals  = payload.get('ocean_values', {})
 
@@ -120,6 +141,13 @@ def forward_messages():
 
             # 8) Produce only {"current_mood": "..."} downstream
             out_payload = {'current_mood': current_mood}
+            # Validate the output against its Avro schema
+            if not validate(out_payload, avro_schema_out):
+                print(f"⚠️  Invalid output for schema {avro_schema_out['name']!r}: {out_payload!r}")
+                # skip sending but still commit so we don't retry bad data
+                consumer.commit(msg)
+                continue
+
             producer.produce(
                 OUTPUT_TOPIC,
                 key=None,
