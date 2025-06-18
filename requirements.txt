@@ -1,0 +1,8 @@
+numpy
+scipy
+matplotlib
+transformers
+torch
+openai
+python-dotenv
+websockets
