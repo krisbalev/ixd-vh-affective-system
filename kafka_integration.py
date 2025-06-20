@@ -7,21 +7,22 @@ import simulation
 from processing import classifier
 from utils import calculate_emotion_intensity
 from optimizer import phi
-from api_client import fetch_topic_schema
+from api_client import fetch_topic_info
 from fastavro.validation import validate
 from fastavro import parse_schema
 
 # Topics and configs
-INPUT_TOPIC  = 'mood_input_topic'
-OUTPUT_TOPIC = 'mood_output_topic'
+INPUT_TOPIC  = 'mood-input-topic'
+OUTPUT_TOPIC = 'mood-output-topic'
 
-brokers = "192.168.120.35:19003,192.168.120.35:19004,192.168.120.35:19005"
+brokers = ""
 
 try:
-    raw_in  = fetch_topic_schema(INPUT_TOPIC)
-    raw_out = fetch_topic_schema(OUTPUT_TOPIC)
-    avro_schema   = parse_schema(raw_in)
-    avro_schema_out = parse_schema(raw_out)
+    info_in   = fetch_topic_info(INPUT_TOPIC)
+    info_out = fetch_topic_info(OUTPUT_TOPIC)
+    avro_schema_in  = parse_schema(info_in["schema"])
+    avro_schema_out = parse_schema(info_out["schema"])
+    brokers         = info_in["bootstrapServers"]
 except Exception as e:
     print(f"❌ Failed to load Avro schemas: {e}")
     raise
@@ -66,8 +67,8 @@ def forward_messages():
             payload     = json.loads(msg.value().decode('utf-8'))
 
             # Validate the schema
-            if not validate(payload, avro_schema):
-                print(f"⚠️  Invalid payload for schema {avro_schema['name']!r}: {payload!r}")
+            if not validate(payload, avro_schema_in):
+                print(f"⚠️  Invalid payload for schema {avro_schema_in['name']!r}: {payload!r}")
                 consumer.commit(msg)
                 continue
 

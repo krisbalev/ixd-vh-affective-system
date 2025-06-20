@@ -8,7 +8,7 @@ from kafka_integration import forward_messages
 
 async def main():
     kafka_thread = threading.Thread(
-        target=lambda: forward_messages(simulation.running_flag),
+        target=lambda: forward_messages(),
         daemon=False
     )
     kafka_thread.start()
