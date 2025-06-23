@@ -9,3 +9,5 @@ websockets
 confluent-kafka
 requests
 fastavro
+influxdb-client
+pymongo
