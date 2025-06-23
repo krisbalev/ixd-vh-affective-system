@@ -1,31 +1,44 @@
-import asyncio
-import threading
+import asyncio, threading, signal
 from multiprocessing import Manager
-
+import kafka_integration as ki
 import simulation
 from processing import process_user_input
-from kafka_integration import forward_messages
+
+def shutdown(signum, frame):
+    print("⚙️  Initiating graceful shutdown…")
+    simulation.running_flag.value = False
+
+signal.signal(signal.SIGINT,  shutdown)
+signal.signal(signal.SIGTERM, shutdown)
+
+
 
 async def main():
+    # 1) Kafka consumer
     kafka_thread = threading.Thread(
-        target=lambda: forward_messages(),
-        daemon=False
+        target=ki.run_consumer_loop,
+        daemon=True
     )
     kafka_thread.start()
 
-    sim_thread = threading.Thread(target=simulation.update_mood, daemon=True)
+    # 2) Simulation updater
+    sim_thread = threading.Thread(
+        target=simulation.update_mood,
+        daemon=True
+    )
     sim_thread.start()
 
-    await process_user_input()
+    # 3) Your async user‑input loop
+    # await process_user_input()
 
-    sim_thread.join()
+    # 4) Wait for threads to finish
     kafka_thread.join()
-
-    print("All threads have shut down. Goodbye!")
+    sim_thread.join()
+    print("✅ All threads stopped. Exiting.")
 
 if __name__ == '__main__':
     manager = Manager()
-    simulation.mood_history   = manager.list()
-    simulation.running_flag   = manager.Value('b', True)
+    simulation.mood_history = manager.list()
+    simulation.running_flag = manager.Value('b', True)
 
     asyncio.run(main())

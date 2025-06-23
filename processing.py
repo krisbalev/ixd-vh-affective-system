@@ -4,7 +4,7 @@ import numpy as np
 from scipy.spatial.distance import cosine
 
 import simulation
-from config import P, TARGET_SHIFT, D, emotion_labels, dt, alpha
+from sys_config import P, TARGET_SHIFT, D, emotion_labels, dt, alpha
 from optimizer import phi
 from utils import calculate_emotion_intensity
 

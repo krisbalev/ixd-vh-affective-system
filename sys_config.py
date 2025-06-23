@@ -1,4 +1,8 @@
 import numpy as np
+from decouple import config
+
+# Kafka
+KAFKA_BOOTSTRAP_SERVERS = config('KAFKA_BOOTSTRAP_SERVERS')
 
 # Emotion labels and PAD space directions
 emotion_labels = [

@@ -11,3 +11,4 @@ requests
 fastavro
 influxdb-client
 pymongo
+python-decouple

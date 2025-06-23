@@ -1,5 +1,4 @@
 # test_init.py
-# Sends an init message with OCEAN scores to the init-bigfive-topic
 
 import json
 from confluent_kafka import Producer
@@ -28,7 +27,7 @@ def main():
     }
 
     producer = Producer({'bootstrap.servers': args.broker})
-    producer.produce('init-bigfive-topic', json.dumps(payload).encode('utf-8'))
+    producer.produce('bigfive-topic', json.dumps(payload).encode('utf-8'))
     producer.flush()
     print(f"Sent init payload: {payload}")
 

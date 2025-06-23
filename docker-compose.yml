@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb2_data:/var/lib/influxdb2
+    environment:
+      # Bootstraps InfluxDB v2 on first start
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: "${INFLUX_USER:-my-user}"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "${INFLUX_PASSWORD:-my-password}"
+      DOCKER_INFLUXDB_INIT_ORG: "${INFLUX_ORG:-my-org}"
+      DOCKER_INFLUXDB_INIT_BUCKET: "${INFLUX_BUCKET:-mood_bucket}"
+      DOCKER_INFLUXDB_INIT_RETENTION: "90d"
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "${INFLUX_TOKEN:-my-super-secret-token}"
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo-local
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  influxdb2_data:
+  mongo_data:

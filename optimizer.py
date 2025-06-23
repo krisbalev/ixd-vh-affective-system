@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
-from config import D, p, a, mu_P, P, S
+from sys_config import D, p, a, mu_P, P, S
 
 # Objective for optimizing phi weights
 def pcmd_objective(phi):
@@ -11,6 +11,6 @@ def pcmd_objective(phi):
 # Optimize phi with bounds phi > 0.1
 res = minimize(pcmd_objective, np.ones(S), bounds=[(0.1, None)] * S)
 phi = res.x
-# print("Optimized phi weights:", phi)
+print("Optimized phi weights:", phi)
 
 

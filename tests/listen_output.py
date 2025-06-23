@@ -1,16 +1,13 @@
-# listen_output.py
-# Consumes messages from mood-output-topic-123 and prints them
-
 import json
 from confluent_kafka import Consumer, KafkaError
 
 def main():
     brokers = '192.168.120.200:9092'
-    topic = 'mood-output-topic-123'
+    topic = 'bigfive-topic'
     consumer = Consumer({
         'bootstrap.servers': brokers,
         'group.id': 'test-output-listener',
-        'auto.offset.reset': 'earliest'
+        'auto.offset.reset': 'latest'
     })
     consumer.subscribe([topic])
 
