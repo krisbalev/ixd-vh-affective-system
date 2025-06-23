@@ -1,6 +1,14 @@
 # ixd-vh-affective-system
 A version of Kristiyan Balev's affective framework, integrated within the platform architecture for the Virtual Humans project at Interaction Design Lectorate (IxD) at Fontys UAS.
 
+# To run the system:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+pip install -r requirements.txt
+python main.py
+```
+
 # To test the Kafka connection:
 ```bash
 python tests\listen_output.py
